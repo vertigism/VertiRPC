@@ -45,10 +45,14 @@ WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
-; Lets the installer notice a running copy and offer to close it, instead of
-; failing on a locked executable. The name matches the mutex App.xaml.cs takes.
-AppMutex=VertiRPC_SingleInstance_Mutex,Global\VertiRPC_SingleInstance_Mutex
+; Restart Manager finds the running copy through the files it holds open and
+; closes it, so an upgrade does not fail on a locked executable. Deliberately no
+; AppMutex: that is checked while Setup initialises, before any of this runs, so
+; it only ever blocked with "please close all instances" -- advice nobody can act
+; on when the app's window is hidden and only its tray icon is left.
 CloseApplications=yes
+; The postinstall task offers to start it again, which is the user's choice to
+; make; silently relaunching something they may have closed on purpose is not.
 RestartApplications=no
 
 [Languages]
@@ -58,7 +62,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; The symbols are left out: nothing in the app surfaces a stack trace, so on a
+; user's machine they are weight with no reader.
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExe}"
@@ -72,8 +78,9 @@ Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags
 Type: files; Name: "{app}\*.log"
 
 [UninstallRun]
-; Stop the running copy before its files go away.
-Filename: "taskkill.exe"; Parameters: "/f /im {#AppExe}"; Flags: runhidden skipifdoesntexist
+; Stop the running copy before its files go away. RunOnceId keeps it to a single
+; execution: without one, an uninstall that repeats a step would run it again.
+Filename: "taskkill.exe"; Parameters: "/f /im {#AppExe}"; RunOnceId: "StopVertiRPC"; Flags: runhidden skipifdoesntexist
 
 [Registry]
 ; The app owns this value through its "Run on Startup" checkbox; uninstalling

@@ -43,7 +43,7 @@ dotnet test (Join-Path $root "tests\VertiRPC.Tests\VertiRPC.Tests.csproj") -c $C
 if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
 
 Write-Host "Publishing..." -ForegroundColor Cyan
-# Framework-dependent: a ~1 MB installer, with the runtime check in the .iss.
+# Framework-dependent: a ~3 MB installer, with the runtime check in the .iss.
 dotnet publish $project -c $Configuration -r $Runtime --self-contained false -o $publishDir --nologo
 if ($LASTEXITCODE -ne 0) { throw "Publish failed" }
 
@@ -52,13 +52,21 @@ if ($SkipInstaller) {
     return
 }
 
+# Inno Setup installs per machine or per user (winget picks the latter, which
+# needs no elevation), and its folder carries the major version, so probe both
+# scopes and wildcard the version rather than pinning one path. The runners have
+# it on PATH, which is why that comes first.
 $iscc = @(
-    "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
-    "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
-) | Where-Object { Test-Path $_ } | Select-Object -First 1
+    (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source,
+    "${env:ProgramFiles(x86)}\Inno Setup *\ISCC.exe",
+    "$env:ProgramFiles\Inno Setup *\ISCC.exe",
+    "$env:LOCALAPPDATA\Programs\Inno Setup *\ISCC.exe"
+) | Where-Object { $_ } |
+    ForEach-Object { Resolve-Path $_ -ErrorAction SilentlyContinue } |
+    Select-Object -First 1 -ExpandProperty Path
 
 if (-not $iscc) {
-    Write-Warning "Inno Setup 6 not found. Install it (winget install JRSoftware.InnoSetup) or pass -SkipInstaller."
+    Write-Warning "Inno Setup not found. Install it (winget install JRSoftware.InnoSetup) or pass -SkipInstaller."
     return
 }
 

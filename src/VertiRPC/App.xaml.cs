@@ -7,8 +7,8 @@ namespace VertiRPC;
 
 public partial class App : Application
 {
-    // Global so the name is visible across sessions, which is also what lets the
-    // installer's AppMutex directive notice a running copy during an upgrade.
+    // Global so one copy is enforced across every session on the machine, not
+    // just within the one it started in.
     private const string SingleInstanceMutexName = @"Global\VertiRPC_SingleInstance_Mutex";
     private const string ActivationEventName = @"Global\VertiRPC_Activate";
 
