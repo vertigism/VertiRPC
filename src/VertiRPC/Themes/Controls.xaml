@@ -15,13 +15,17 @@
     <sys:Double x:Key="Indicator.Size">18</sys:Double>
 
     <!-- The form's spacing, which FormScrollViewer below reads. The inset is what
-         surrounds the form when nothing else is in the way. When the scroll bar
-         is showing it takes the right edge, so the content stops a gap short of
-         it and the bar keeps the same gap to the frame: 4 either side, rather
-         than one number for the content and a different one for the bar. -->
+         surrounds the form when nothing else is in the way.
+
+         When the scroll bar is showing it takes the right edge, and the gap
+         either side of the handle comes out at half the inset, so the form does
+         not lose a wide margin to it whenever the bar appears. The 1 is well
+         under that half because the track is wider than the handle it draws and
+         contributes a gutter of its own: the number is what measures right on
+         screen rather than what the arithmetic suggests. -->
     <Thickness x:Key="Form.Inset">10</Thickness>
-    <Thickness x:Key="Form.InsetBesideScrollBar">10,10,4,10</Thickness>
-    <Thickness x:Key="Form.ScrollBarGap">0,0,4,0</Thickness>
+    <Thickness x:Key="Form.InsetBesideScrollBar">10,10,1,10</Thickness>
+    <Thickness x:Key="Form.ScrollBarGap">0,0,1,0</Thickness>
 
     <!-- The system focus rectangle: a black dotted line that alt-tabbing back in
          paints around whatever holds focus, because holding Alt turns on the
