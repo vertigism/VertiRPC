@@ -52,9 +52,17 @@ public partial class App : Application
         // Windows starts us with --tray at sign-in, where opening the window
         // would be an interruption; the tray icon still has to appear.
         if (args.Args.Contains(StartupService.TrayArgument, StringComparer.OrdinalIgnoreCase))
+        {
             _window.Tray.ForceCreate();
+        }
         else
+        {
             _window.Show();
+
+            // Not at sign-in, where a dialog lands on someone who has only just
+            // logged in. The daily check comes round soon enough for that copy.
+            _ = _viewModel.CheckForUpdatesAsync(announce: false);
+        }
 
         SessionEnding += async (_, _) => await ShutdownAsync();
     }

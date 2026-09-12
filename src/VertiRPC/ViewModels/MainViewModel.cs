@@ -1,4 +1,6 @@
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,9 +18,16 @@ namespace VertiRPC.ViewModels;
 /// </summary>
 public sealed partial class MainViewModel : ObservableObject, IDisposable
 {
-    public const string RepositoryUrl = "https://github.com/vertigism/VertiRPC";
-
     private static readonly TimeSpan DiscordPollInterval = TimeSpan.FromSeconds(5);
+
+    /// <summary>How long a check stands before the next one is due.</summary>
+    private static readonly TimeSpan UpdateCheckInterval = TimeSpan.FromHours(24);
+
+    /// <summary>Ticks often enough that a machine waking from sleep is not left stale.</summary>
+    private static readonly TimeSpan UpdateTickInterval = TimeSpan.FromHours(1);
+
+    private static readonly Version CurrentVersion =
+        Assembly.GetExecutingAssembly().GetName().Version!;
 
     private readonly SettingsService _settingsService;
     private readonly PresenceService _presence;
@@ -27,6 +36,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly AppSettings _settings;
     private readonly DispatcherTimer _discordTimer;
     private readonly DispatcherTimer _midnightTimer;
+    private readonly DispatcherTimer _updateTimer;
+    private readonly UpdateService _updates = new();
 
     /// <summary>Kept out of the settings: the end time stays editable while switched off.</summary>
     private DateTime _customEnd;
@@ -55,6 +66,10 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _midnightTimer = new DispatcherTimer();
         _midnightTimer.Tick += OnMidnightRollover;
 
+        _updateTimer = new DispatcherTimer { Interval = UpdateTickInterval };
+        _updateTimer.Tick += OnUpdateTick;
+        _updateTimer.Start();
+
         if (AutoConnect)
             StartWatching();
     }
@@ -69,8 +84,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// Read off the assembly, so the csproj stays the one place the version is
     /// written. A compiled assembly always carries one, hence no fallback.
     /// </summary>
-    public static string Title { get; } =
-        $"VertiRPC {Assembly.GetExecutingAssembly().GetName().Version!.ToString(3)}";
+    public static string Title { get; } = $"VertiRPC {CurrentVersion.ToString(3)}";
 
     public static IReadOnlyList<ActivityType> ActivityTypes { get; } = Enum.GetValues<ActivityType>();
 
@@ -244,13 +258,101 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private static void OpenRepository() =>
-        Process.Start(new ProcessStartInfo(RepositoryUrl) { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo(AppPaths.RepositoryUrl) { UseShellExecute = true });
 
     [RelayCommand]
     private void ShowWindow() => ShowWindowRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
     private void Exit() => ExitRequested?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>Asked for from the tray, so it reports finding nothing as well.</summary>
+    [RelayCommand]
+    private async Task CheckForUpdates() => await CheckForUpdatesAsync(announce: true);
+
+    /// <summary>
+    /// Offers the newer release, if there is one, and hands over to its installer
+    /// when the user accepts.
+    /// </summary>
+    /// <param name="announce">
+    /// Whether the user asked. A check of its own accord stays quiet unless there
+    /// is something to accept, honours the interval, and does not re-offer a
+    /// version already turned down.
+    /// </param>
+    public async Task CheckForUpdatesAsync(bool announce)
+    {
+        if (!announce
+            && _settings.LastUpdateCheck is { } last
+            && DateTimeOffset.Now - last < UpdateCheckInterval)
+            return;
+
+        _settings.LastUpdateCheck = DateTimeOffset.Now;
+        Save();
+
+        var update = await _updates.FindUpdateAsync(CurrentVersion);
+
+        if (update is null)
+        {
+            if (announce)
+                Dialogs.Information("No Update", $"VertiRPC {CurrentVersion.ToString(3)} is the latest version.");
+
+            return;
+        }
+
+        if (!announce && _settings.SkippedUpdate == update.Version.ToString())
+            return;
+
+        var accepted = Dialogs.Question(
+            "Update Available",
+            $"VertiRPC {update.Version.ToString(3)} is available. You have {CurrentVersion.ToString(3)}."
+            + Environment.NewLine + Environment.NewLine
+            + "Download and install it now? VertiRPC will close while it updates, and start again afterwards.");
+
+        if (!accepted)
+        {
+            // Remembered so the prompt does not return every day for a version
+            // already turned down; a later one asks again.
+            _settings.SkippedUpdate = update.Version.ToString();
+            Save();
+            return;
+        }
+
+        var installer = await _updates.DownloadAsync(update);
+
+        if (installer is null)
+        {
+            Dialogs.Error("Update Failed", "The update could not be downloaded. Try again, or fetch it from the GitHub page.");
+            return;
+        }
+
+        StartInstaller(installer);
+    }
+
+    /// <summary>
+    /// Hands over to the installer and gets out of its way: it replaces the very
+    /// files this process is running from, so it cannot run while they change.
+    /// </summary>
+    private void StartInstaller(string installerPath)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(installerPath)
+            {
+                // Silent, but not invisible: a progress window, and the flag that
+                // tells Setup to start VertiRPC again once it is finished.
+                Arguments = "/SILENT /NORESTART /fromapp=1",
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex) when (ex is Win32Exception or FileNotFoundException)
+        {
+            Debug.WriteLine($"Could not start the installer: {ex.Message}");
+            Dialogs.Error("Update Failed", "The installer could not be started.");
+            return;
+        }
+
+        ExitRequested?.Invoke(this, EventArgs.Empty);
+    }
 
     /// <summary>Saves, clears the presence and lets go of the pipe, for a real exit.</summary>
     public async Task ShutdownAsync()
@@ -266,6 +368,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     {
         _discordTimer.Tick -= OnDiscordTick;
         _midnightTimer.Tick -= OnMidnightRollover;
+        _updateTimer.Tick -= OnUpdateTick;
+        _updateTimer.Stop();
+        _updates.Dispose();
         _presence.Dispose();
     }
 
@@ -311,6 +416,20 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             Debug.WriteLine($"Auto-connect tick failed: {ex.Message}");
+        }
+    }
+
+    private async void OnUpdateTick(object? sender, EventArgs args)
+    {
+        // Same reasoning as the midnight refresh: past the first await there is
+        // nothing above this to catch anything.
+        try
+        {
+            await CheckForUpdatesAsync(announce: false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Update check failed: {ex.Message}");
         }
     }
 

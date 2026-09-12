@@ -21,6 +21,18 @@ internal static class Dialogs
     internal static void Error(string caption, string message) =>
         Show(caption, message, MessageBoxImage.Error);
 
+    /// <summary>A yes or no for the user to answer. Plays the question sound.</summary>
+    internal static bool Question(string caption, string message)
+    {
+        var owner = Application.Current?.MainWindow;
+
+        var answer = owner is { IsVisible: true }
+            ? MessageBox.Show(owner, message, caption, MessageBoxButton.YesNo, MessageBoxImage.Question)
+            : MessageBox.Show(message, caption, MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        return answer == MessageBoxResult.Yes;
+    }
+
     private static void Show(string caption, string message, MessageBoxImage icon)
     {
         // Owned, so the dialog sits above the window and centres on it. A copy

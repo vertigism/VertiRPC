@@ -74,6 +74,9 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopico
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+; An update VertiRPC started runs silently, which skips the task above. It closed
+; itself to let Setup replace its files, so Setup is what has to bring it back.
+Filename: "{app}\{#AppExe}"; Flags: nowait; Check: StartedByApp
 
 [UninstallDelete]
 ; Written by the app next to its own executable, never by the installer.
@@ -92,6 +95,13 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: 
 [Code]
 const
   DotNetDownloadUrl = 'https://dotnet.microsoft.com/download/dotnet/10.0/runtime';
+
+{ VertiRPC passes /fromapp=1 when it is updating itself, so Setup can tell an
+  update the user accepted in the app from an ordinary silent install. }
+function StartedByApp: Boolean;
+begin
+  Result := ExpandConstant('{param:fromapp|0}') = '1';
+end;
 
 { VertiRPC is published framework-dependent, so the desktop runtime has to be
   present. The shared framework folder is the simplest reliable marker. }

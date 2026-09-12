@@ -73,6 +73,7 @@ public sealed class SettingsService(string? filePath = null)
         settings.ClientId = settings.ClientId.Trim();
         settings.Details = settings.Details.Trim();
         settings.State = settings.State.Trim();
+        settings.SkippedUpdate = settings.SkippedUpdate?.Trim() ?? string.Empty;
 
         settings.Timestamp ??= new TimestampSettings();
 

@@ -35,6 +35,7 @@
             <tray:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Open" Command="{Binding ShowWindowCommand}" />
+                    <MenuItem Header="Check for Updates" Command="{Binding CheckForUpdatesCommand}" />
                     <MenuItem Header="GitHub Page" Command="{Binding OpenRepositoryCommand}" />
                     <Separator />
                     <MenuItem Header="Exit" Command="{Binding ExitCommand}" />

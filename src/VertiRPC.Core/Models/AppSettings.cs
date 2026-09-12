@@ -19,6 +19,15 @@ public sealed class AppSettings
 
     public bool PinkTheme { get; set; } = false;
 
+    /// <summary>
+    /// When the last update check ran, so a copy left in the tray for days looks
+    /// again now and then without asking GitHub on every tick.
+    /// </summary>
+    public DateTimeOffset? LastUpdateCheck { get; set; }
+
+    /// <summary>A version the user declined, so the prompt does not return for it.</summary>
+    public string SkippedUpdate { get; set; } = string.Empty;
+
     /// <summary>First presence line, shown under the activity name.</summary>
     public string Details { get; set; } = string.Empty;
 
