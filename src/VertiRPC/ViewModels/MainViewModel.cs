@@ -313,8 +313,18 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private async void OnMidnightRollover(object? sender, EventArgs args)
     {
         _midnightTimer.Stop();
-        if (TimestampMode == Models.TimestampMode.LocalTime && _presence.IsPushed)
-            await PushAsync(announce: false);
+
+        // Caught here or not at all: the handler returns at the first await, so
+        // anything thrown after it lands on the dispatcher and ends the process.
+        try
+        {
+            if (TimestampMode == Models.TimestampMode.LocalTime && _presence.IsPushed)
+                await PushAsync(announce: false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Midnight refresh failed: {ex.Message}");
+        }
     }
 
     /// <param name="announce">
