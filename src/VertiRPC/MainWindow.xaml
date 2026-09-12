@@ -1,0 +1,255 @@
+<Window x:Class="VertiRPC.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:VertiRPC.Controls"
+        xmlns:tray="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
+        xmlns:vm="clr-namespace:VertiRPC.ViewModels"
+        Title="{x:Static vm:MainViewModel.Title}"
+        Width="500"
+        Height="750"
+        MinWidth="420"
+        MinHeight="420"
+        Icon="/Assets/icon.ico"
+        Background="{DynamicResource Brush.Background}"
+        TextOptions.TextFormattingMode="Display">
+
+    <Window.Resources>
+        <!-- Two columns, label then field, shared by every form row. -->
+        <Style x:Key="FormGrid" TargetType="Grid">
+            <Setter Property="Margin" Value="0,3" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <tray:TaskbarIcon x:Name="Tray"
+                          IconSource="/Assets/icon.ico"
+                          ToolTipText="VertiRPC"
+                          NoLeftClickDelay="True"
+                          LeftClickCommand="{Binding ShowWindowCommand}">
+            <tray:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Open" Command="{Binding ShowWindowCommand}" />
+                    <MenuItem Header="GitHub Page" Command="{Binding OpenRepositoryCommand}" />
+                    <Separator />
+                    <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
+                </ContextMenu>
+            </tray:TaskbarIcon.ContextMenu>
+        </tray:TaskbarIcon>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="14,14,10,14">
+            <StackPanel>
+
+                <GroupBox Header="Core Settings">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Client ID:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding ClientId, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Activity Type:" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{x:Static vm:MainViewModel.ActivityTypes}"
+                                      SelectedItem="{Binding ActivityType}" />
+                        </Grid>
+                        <CheckBox Content="Run on Startup"
+                                  Margin="0,8,0,0"
+                                  IsChecked="{Binding RunOnStartup}" />
+                        <CheckBox Content="Auto-connect when Discord opens"
+                                  Margin="0,6,0,0"
+                                  IsChecked="{Binding AutoConnect}" />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Activity Details">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Title:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding Details, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Description:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding State, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Timestamp">
+                    <StackPanel>
+                        <RadioButton GroupName="Timestamp"
+                                     Content="Since the app started"
+                                     IsChecked="{Binding TimestampMode, Converter={StaticResource EnumMatch}, ConverterParameter=AppStart}" />
+                        <RadioButton GroupName="Timestamp"
+                                     Content="Since last presence update"
+                                     IsChecked="{Binding TimestampMode, Converter={StaticResource EnumMatch}, ConverterParameter=LastUpdate}" />
+                        <RadioButton GroupName="Timestamp"
+                                     Content="Your local time"
+                                     IsChecked="{Binding TimestampMode, Converter={StaticResource EnumMatch}, ConverterParameter=LocalTime}" />
+                        <RadioButton GroupName="Timestamp"
+                                     Content="Custom timestamp"
+                                     IsChecked="{Binding TimestampMode, Converter={StaticResource EnumMatch}, ConverterParameter=Custom}" />
+
+                        <StackPanel Margin="24,8,0,0" IsEnabled="{Binding IsCustomTimestamp}">
+                            <Grid Style="{StaticResource FormGrid}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Start:" Style="{StaticResource FieldLabel}" />
+                                <controls:DateTimePicker Grid.Column="1" Value="{Binding CustomStart}" />
+                            </Grid>
+                            <Grid Style="{StaticResource FormGrid}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Content="End:"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding CustomEndEnabled}" />
+                                <controls:DateTimePicker Grid.Column="1"
+                                                         Value="{Binding CustomEnd}"
+                                                         IsEnabled="{Binding CustomEndEnabled}" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Images &amp; Assets">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Large Image Key/URL:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding LargeImage, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Large Image Text:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding LargeText, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Small Image Key/URL:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SmallImage, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Small Image Text:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SmallText, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <TextBlock Style="{StaticResource NoteText}"
+                                   Margin="0,8,0,0"
+                                   Text="Note: For Listening, Watching, and Competing, the &quot;Large Image Text&quot; will appear as an additional line at the end of the description." />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Action Buttons">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Button 1 Label:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding Button1Label, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Button 1 URL:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding Button1Url, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Button 2 Label:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding Button2Label, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FormGrid}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Button 2 URL:" Style="{StaticResource FieldLabel}" />
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding Button2Url, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Pinned below the scroll area, so the action and its result stay put
+             however far down the form the user is. -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource Brush.Background}"
+                BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="0,1,0,0"
+                Padding="14,12">
+            <StackPanel>
+                <TextBlock Text="{Binding StatusMessage}" Margin="0,0,0,10">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource StatusText}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding StatusIsError}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Weekend}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding StatusMessage}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Button Content="Update Presence" Command="{Binding UpdatePresenceCommand}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

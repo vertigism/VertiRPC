@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VertiRPC.Core/VertiRPC.Core.csproj" />
+    <Project Path="src/VertiRPC/VertiRPC.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VertiRPC.Tests/VertiRPC.Tests.csproj" />
+  </Folder>
+</Solution>

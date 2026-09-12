@@ -1,0 +1,19 @@
+<Application x:Class="VertiRPC.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:VertiRPC.Converters"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- The palette must stay first: ThemeManager swaps this entry
+                     in place, and everything after it reads the brushes. -->
+                <ResourceDictionary Source="Themes/Dark.xaml" />
+                <ResourceDictionary Source="Themes/Controls.xaml" />
+                <ResourceDictionary Source="Themes/Calendar.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:EnumMatchConverter x:Key="EnumMatch" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

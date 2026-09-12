@@ -1,0 +1,15 @@
+bin/
+obj/
+publish/
+installer/Output/
+
+*.user
+*.suo
+
+.vs/
+.vscode/
+
+# Legacy PyQt build artifacts
+__pycache__/
+VertiRPC.old/build/
+VertiRPC.old/dist/

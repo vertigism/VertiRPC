@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- The easter egg palette, reached by clicking the title bar icon. -->
+    <SolidColorBrush x:Key="Brush.Background" Color="#fce8f0" />
+    <SolidColorBrush x:Key="Brush.Field" Color="#f8d9e7" />
+    <SolidColorBrush x:Key="Brush.ScrollHandle" Color="#f2aecb" />
+    <SolidColorBrush x:Key="Brush.Border" Color="#f2a8c6" />
+    <SolidColorBrush x:Key="Brush.Accent" Color="#f291b8" />
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="#e87ba8" />
+    <SolidColorBrush x:Key="Brush.Hover" Color="#f6cfe0" />
+    <SolidColorBrush x:Key="Brush.Text" Color="#7d4a63" />
+    <SolidColorBrush x:Key="Brush.TextMuted" Color="#96677e" />
+    <SolidColorBrush x:Key="Brush.TextStrong" Color="#6b3a52" />
+    <SolidColorBrush x:Key="Brush.TextOnAccent" Color="#5e3047" />
+    <SolidColorBrush x:Key="Brush.Weekend" Color="#e0679b" />
+
+</ResourceDictionary>

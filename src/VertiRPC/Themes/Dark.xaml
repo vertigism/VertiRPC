@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Discord's own dark palette. Keys are shared with Pink.xaml; swapping the
+         dictionary is all a theme change takes. -->
+    <SolidColorBrush x:Key="Brush.Background" Color="#2b2d31" />
+    <SolidColorBrush x:Key="Brush.Field" Color="#1e1f22" />
+    <SolidColorBrush x:Key="Brush.ScrollHandle" Color="#1e1f22" />
+    <SolidColorBrush x:Key="Brush.Border" Color="#4f545c" />
+    <SolidColorBrush x:Key="Brush.Accent" Color="#5865f2" />
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="#4752c4" />
+    <SolidColorBrush x:Key="Brush.Hover" Color="#35373c" />
+    <SolidColorBrush x:Key="Brush.Text" Color="#dbdee1" />
+    <SolidColorBrush x:Key="Brush.TextMuted" Color="#949ba4" />
+    <SolidColorBrush x:Key="Brush.TextStrong" Color="#ffffff" />
+    <SolidColorBrush x:Key="Brush.TextOnAccent" Color="#ffffff" />
+    <SolidColorBrush x:Key="Brush.Weekend" Color="#ff0000" />
+
+</ResourceDictionary>
