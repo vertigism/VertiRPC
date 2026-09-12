@@ -11,14 +11,13 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
             <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-            <Setter Property="Padding" Value="6,5" />
+            <Setter Property="Padding" Value="6,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                        <Border Background="Transparent">
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          VerticalAlignment="Center"
                                           Focusable="False"
                                           HorizontalScrollBarVisibility="Hidden"
                                           VerticalScrollBarVisibility="Hidden" />
@@ -56,7 +55,7 @@
             BorderBrush="{DynamicResource Brush.Field}"
             BorderThickness="1"
             CornerRadius="4"
-            MinHeight="{DynamicResource Field.Height}">
+            Height="{DynamicResource Field.Height}">
         <Border.Style>
             <Style TargetType="Border">
                 <Style.Triggers>

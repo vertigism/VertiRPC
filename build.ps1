@@ -25,6 +25,17 @@ $version = $csproj.Project.PropertyGroup.Version | Where-Object { $_ } | Select-
 if (-not $version) { throw "No <Version> found in $project" }
 Write-Host "VertiRPC $version" -ForegroundColor Cyan
 
+# A copy running out of this repo holds its DLLs open, which would fail the
+# clean below. An installed copy anywhere else is left alone.
+$ours = Get-Process VertiRPC -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -and $_.Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) }
+
+foreach ($instance in $ours) {
+    Write-Host "Stopping $($instance.Path) (pid $($instance.Id))" -ForegroundColor Yellow
+    Stop-Process -Id $instance.Id -Force
+}
+if ($ours) { $ours | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue }
+
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 
 Write-Host "Running tests..." -ForegroundColor Cyan

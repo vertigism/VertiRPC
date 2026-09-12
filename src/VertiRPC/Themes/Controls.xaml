@@ -57,8 +57,14 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-        <Setter Property="Padding" Value="6,5" />
-        <Setter Property="MinHeight" Value="{DynamicResource Field.Height}" />
+        <!-- Vertical padding is left at zero and the text centred instead:
+             WPF's text view applies Padding itself, so setting it as a margin
+             on the content host too would halve the usable height. -->
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <!-- Fixed, not MinHeight: these are single-line fields and every input
+             has to come out the same height as the combo box. -->
+        <Setter Property="Height" Value="{DynamicResource Field.Height}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -68,8 +74,6 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="4">
                         <ScrollViewer x:Name="PART_ContentHost"
-                                      Margin="{TemplateBinding Padding}"
-                                      VerticalAlignment="Center"
                                       Focusable="False"
                                       HorizontalScrollBarVisibility="Hidden"
                                       VerticalScrollBarVisibility="Hidden" />
@@ -284,7 +288,7 @@
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="MinHeight" Value="{DynamicResource Field.Height}" />
+        <Setter Property="Height" Value="{DynamicResource Field.Height}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
@@ -352,7 +356,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
                     <Border Background="{DynamicResource Brush.ScrollHandle}"
-                            CornerRadius="5"
+                            CornerRadius="3"
                             Margin="2" />
                 </ControlTemplate>
             </Setter.Value>
@@ -361,7 +365,7 @@
 
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="{DynamicResource Brush.Background}" />
-        <Setter Property="Width" Value="14" />
+        <Setter Property="Width" Value="9" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
@@ -378,7 +382,7 @@
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
                 <Setter Property="Width" Value="Auto" />
-                <Setter Property="Height" Value="14" />
+                <Setter Property="Height" Value="9" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ScrollBar">
