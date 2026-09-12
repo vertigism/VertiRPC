@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
 using VertiRPC.ViewModels;
 
@@ -114,6 +115,22 @@ public partial class MainWindow : Window
 
         var useDark = _viewModel.PinkTheme ? 0 : 1;
         DwmSetWindowAttribute(handle, DwmUseImmersiveDarkMode, in useDark, sizeof(int));
+    }
+
+    /// <summary>
+    /// Swallows Tab so it does not walk the form. Leaving it to keyboard
+    /// navigation sent focus straight out of the window, since the form is one
+    /// container with nothing after it.
+    /// </summary>
+    protected override void OnPreviewKeyDown(KeyEventArgs args)
+    {
+        if (args.Key is Key.Tab)
+        {
+            args.Handled = true;
+            return;
+        }
+
+        base.OnPreviewKeyDown(args);
     }
 
     protected override void OnClosing(CancelEventArgs args)
