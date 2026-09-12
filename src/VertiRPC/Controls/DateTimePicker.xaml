@@ -90,7 +90,8 @@
                 <Calendar x:Name="CalendarPart"
                           Margin="0,2,0,0"
                           Style="{DynamicResource ThemedCalendar}"
-                          SelectedDatesChanged="OnCalendarDatePicked" />
+                          SelectedDatesChanged="OnCalendarDatePicked"
+                          DisplayModeChanged="OnCalendarDisplayModeChanged" />
             </Popup>
         </Grid>
     </Border>

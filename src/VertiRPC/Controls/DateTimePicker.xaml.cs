@@ -62,9 +62,23 @@ public partial class DateTimePicker : UserControl
     private void OnPopupOpened(object? sender, EventArgs args)
     {
         _updatingText = true;
+        // Always open on the day grid: the mode otherwise persists from the
+        // last time the header was clicked, leaving a year or decade view.
+        CalendarPart.DisplayMode = CalendarMode.Month;
         CalendarPart.SelectedDate = Value.Date;
         CalendarPart.DisplayDate = Value.Date;
         _updatingText = false;
+    }
+
+    /// <summary>
+    /// Keeps the calendar on the day grid. The themed template does not swap in
+    /// the year and decade views, so any other mode would show a header that
+    /// disagrees with the grid under it.
+    /// </summary>
+    private void OnCalendarDisplayModeChanged(object sender, CalendarModeChangedEventArgs args)
+    {
+        if (CalendarPart.DisplayMode != CalendarMode.Month)
+            CalendarPart.DisplayMode = CalendarMode.Month;
     }
 
     private void OnCalendarDatePicked(object sender, SelectionChangedEventArgs args)

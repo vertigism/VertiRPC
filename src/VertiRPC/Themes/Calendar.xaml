@@ -6,19 +6,25 @@
     <converters:IsWeekendConverter x:Key="IsWeekend" />
 
     <!-- Month arrows. Qt needed six SVG files for these, two per direction per
-         theme; here they are geometry that inherits the palette. -->
-    <Style x:Key="CalendarArrowButton" TargetType="Button">
+         theme; here they are geometry that inherits the palette.
+         The geometry is literal in each template rather than passed through
+         Content: TemplateBinding does no type conversion, so a string would
+         never reach Path.Data as a Geometry. -->
+    <Style x:Key="CalendarNavButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Width" Value="28" />
         <Setter Property="Height" Value="26" />
-        <Setter Property="Margin" Value="4,4" />
+        <Setter Property="Margin" Value="4" />
+    </Style>
+
+    <Style x:Key="CalendarPreviousButton" TargetType="Button" BasedOn="{StaticResource CalendarNavButton}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
-                        <Path Data="{TemplateBinding Content}"
+                        <Path Data="M 6,0 L 1,5 L 6,10"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"
                               Stroke="{DynamicResource Brush.Text}"
@@ -36,27 +42,49 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CalendarHeaderButton" TargetType="Button">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Focusable" Value="False" />
+    <Style x:Key="CalendarNextButton" TargetType="Button" BasedOn="{StaticResource CalendarNavButton}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bd" Background="Transparent" CornerRadius="4" Padding="8,4" Margin="2,4">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          TextBlock.Foreground="{TemplateBinding Foreground}"
-                                          TextBlock.FontWeight="Bold" />
+                    <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                        <Path Data="M 1,0 L 6,5 L 1,10"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Stroke="{DynamicResource Brush.Text}"
+                              StrokeThickness="1.8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.Hover}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Shows the month and year, but is not clickable: CalendarItem does not
+         switch PART_MonthView for PART_YearView inside this template, which
+         left the header reading a year over a grid of days. The month arrows
+         cover nearby months and the date can be typed for anything further. -->
+    <Style x:Key="CalendarHeaderButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="Transparent" Padding="8,4" Margin="2,4">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextBlock.Foreground="{TemplateBinding Foreground}"
+                                          TextBlock.FontWeight="Bold" />
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -176,15 +204,13 @@
                                     </Grid.ColumnDefinitions>
                                     <Button x:Name="PART_PreviousButton"
                                             Grid.Column="0"
-                                            Style="{StaticResource CalendarArrowButton}"
-                                            Content="M 6 0 L 1 5 L 6 10" />
+                                            Style="{StaticResource CalendarPreviousButton}" />
                                     <Button x:Name="PART_HeaderButton"
                                             Grid.Column="1"
                                             Style="{StaticResource CalendarHeaderButton}" />
                                     <Button x:Name="PART_NextButton"
                                             Grid.Column="2"
-                                            Style="{StaticResource CalendarArrowButton}"
-                                            Content="M 1 0 L 6 5 L 1 10" />
+                                            Style="{StaticResource CalendarNextButton}" />
                                 </Grid>
                             </Border>
 
@@ -223,6 +249,16 @@
                                     </Grid.RowDefinitions>
                                 </Grid>
                             </Grid>
+
+                            <!-- Part of the expected set; the control looks it
+                                 up when the calendar is disabled. -->
+                            <Rectangle x:Name="PART_DisabledVisual"
+                                       Grid.Row="1"
+                                       Fill="{DynamicResource Brush.Background}"
+                                       Opacity="0.5"
+                                       Visibility="Collapsed"
+                                       RadiusX="4"
+                                       RadiusY="4" />
                         </Grid>
                     </Border>
                 </ControlTemplate>
