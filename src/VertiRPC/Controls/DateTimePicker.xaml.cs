@@ -6,14 +6,24 @@ using System.Windows.Input;
 namespace VertiRPC.Controls;
 
 /// <summary>
-/// A date and a time in one control, which WPF has no equivalent of: the date
-/// comes from a <see cref="DatePicker"/> and the time from a 24-hour text box.
+/// A single date-and-time field with a calendar popup, which WPF has no
+/// equivalent of. The text is editable directly, in the same
+/// <c>dd.MM.yyyy HH:mm:ss</c> shape the Qt build used.
 /// </summary>
 public partial class DateTimePicker : UserControl
 {
-    private const string TimeFormat = "HH:mm:ss";
+    private const string DisplayFormat = "dd.MM.yyyy HH:mm:ss";
 
-    private static readonly string[] AcceptedTimeFormats = ["HH:mm:ss", "H:mm:ss", "HH:mm", "H:mm"];
+    /// <summary>Typing the seconds is optional, and either separator style is taken.</summary>
+    private static readonly string[] AcceptedFormats =
+    [
+        "dd.MM.yyyy HH:mm:ss",
+        "dd.MM.yyyy HH:mm",
+        "d.M.yyyy HH:mm:ss",
+        "d.M.yyyy HH:mm",
+        "dd/MM/yyyy HH:mm:ss",
+        "dd-MM-yyyy HH:mm:ss",
+    ];
 
     public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
         nameof(Value),
@@ -25,7 +35,7 @@ public partial class DateTimePicker : UserControl
             OnValueChanged));
 
     /// <summary>Guards against the control's own edits being read back as user input.</summary>
-    private bool _updatingParts;
+    private bool _updatingText;
 
     public DateTimePicker()
     {
@@ -44,48 +54,54 @@ public partial class DateTimePicker : UserControl
 
     private void ShowValue(DateTime value)
     {
-        _updatingParts = true;
-        DatePart.SelectedDate = value.Date;
-        TimePart.Text = value.ToString(TimeFormat, CultureInfo.CurrentCulture);
-        _updatingParts = false;
+        _updatingText = true;
+        TextPart.Text = value.ToString(DisplayFormat, CultureInfo.InvariantCulture);
+        _updatingText = false;
     }
 
-    private void OnDateChanged(object sender, SelectionChangedEventArgs args)
+    private void OnPopupOpened(object? sender, EventArgs args)
     {
-        if (_updatingParts || DatePart.SelectedDate is not { } date)
+        _updatingText = true;
+        CalendarPart.SelectedDate = Value.Date;
+        CalendarPart.DisplayDate = Value.Date;
+        _updatingText = false;
+    }
+
+    private void OnCalendarDatePicked(object sender, SelectionChangedEventArgs args)
+    {
+        if (_updatingText || CalendarPart.SelectedDate is not { } date)
             return;
 
+        // The calendar owns the date only; the time stays as typed.
         Value = date.Date + Value.TimeOfDay;
+        PopupToggle.IsChecked = false;
     }
 
-    private void OnTimeKeyDown(object sender, KeyEventArgs args)
+    private void OnTextKeyDown(object sender, KeyEventArgs args)
     {
         if (args.Key is not (Key.Enter or Key.Return))
             return;
 
-        CommitTime();
+        CommitText();
         args.Handled = true;
     }
 
-    private void OnTimeLostFocus(object sender, RoutedEventArgs args) => CommitTime();
+    private void OnTextLostFocus(object sender, RoutedEventArgs args) => CommitText();
 
-    /// <summary>
-    /// Accepts <c>HH:mm</c> as well as <c>HH:mm:ss</c>, and puts the old time
-    /// back when the text is not a time at all.
-    /// </summary>
-    private void CommitTime()
+    /// <summary>Puts the old value back when the text is not a date and time at all.</summary>
+    private void CommitText()
     {
-        if (_updatingParts)
+        if (_updatingText)
             return;
 
         if (DateTime.TryParseExact(
-                TimePart.Text.Trim(),
-                AcceptedTimeFormats,
-                CultureInfo.CurrentCulture,
+                TextPart.Text.Trim(),
+                AcceptedFormats,
+                CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out var parsed))
         {
-            Value = Value.Date + parsed.TimeOfDay;
+            Value = parsed;
         }
 
         ShowValue(Value);

@@ -172,9 +172,11 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <!-- Square, like the Qt build: the stylesheet gave radio
+                             and check indicators the same 3px radius. -->
                         <Border x:Name="Box"
                                 Width="16" Height="16"
-                                CornerRadius="8"
+                                CornerRadius="3"
                                 Background="{DynamicResource Brush.Field}"
                                 BorderBrush="{DynamicResource Brush.Border}"
                                 BorderThickness="1"
@@ -203,11 +205,12 @@
 
     <!-- Group boxes: the header sits on the border line, as Qt's did. -->
 
+    <!-- No FontWeight here: it is inherited, and would make every label inside
+         the group bold. Only the header is bold, set in the template. -->
     <Style TargetType="GroupBox">
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Margin" Value="0,0,0,12" />
         <Setter Property="Padding" Value="12" />
         <Setter Property="Template">
@@ -386,6 +389,68 @@
     <Style TargetType="ScrollViewer">
         <Setter Property="Background" Value="{DynamicResource Brush.Background}" />
         <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- The tray menu, which would otherwise be the bright system default. -->
+
+    <Style TargetType="ContextMenu">
+        <Setter Property="Background" Value="{DynamicResource Brush.Field}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
+        <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{DynamicResource Brush.Border}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="4">
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
+        <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
+        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            CornerRadius="4"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Header"
+                                          VerticalAlignment="Center"
+                                          TextBlock.Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.TextMuted}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Separator">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border Height="1" Margin="6,4" Background="{DynamicResource Brush.Border}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

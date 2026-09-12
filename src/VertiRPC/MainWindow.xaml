@@ -65,12 +65,21 @@
                                       ItemsSource="{x:Static vm:MainViewModel.ActivityTypes}"
                                       SelectedItem="{Binding ActivityType}" />
                         </Grid>
-                        <CheckBox Content="Run on Startup"
-                                  Margin="0,8,0,0"
-                                  IsChecked="{Binding RunOnStartup}" />
-                        <CheckBox Content="Auto-connect when Discord opens"
-                                  Margin="0,6,0,0"
-                                  IsChecked="{Binding AutoConnect}" />
+                        <!-- Indented to the field column, where the Qt form put
+                             rows whose label was empty. -->
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="1">
+                                <CheckBox Content="Run on Startup"
+                                          IsChecked="{Binding RunOnStartup}" />
+                                <CheckBox Content="Auto-connect when Discord opens"
+                                          Margin="0,6,0,0"
+                                          IsChecked="{Binding AutoConnect}" />
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </GroupBox>
 
