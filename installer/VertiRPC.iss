@@ -7,8 +7,10 @@
 #define AppUrl "https://github.com/vertigism/VertiRPC"
 #define AppExe "VertiRPC.exe"
 
+; No fallback on purpose: the version lives in the csproj, and a default here
+; would quietly stamp a stale number on a setup built any other way.
 #ifndef AppVersion
-  #define AppVersion "2.0.0"
+  #error AppVersion was not passed in. Build through build.ps1, which reads it from the csproj.
 #endif
 
 #ifndef PublishDir

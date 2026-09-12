@@ -65,8 +65,12 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// <summary>Raised when the tray asks the app to quit for real.</summary>
     public event EventHandler? ExitRequested;
 
+    /// <summary>
+    /// Read off the assembly, so the csproj stays the one place the version is
+    /// written. A compiled assembly always carries one, hence no fallback.
+    /// </summary>
     public static string Title { get; } =
-        $"VertiRPC {Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "2.0.0"}";
+        $"VertiRPC {Assembly.GetExecutingAssembly().GetName().Version!.ToString(3)}";
 
     public static IReadOnlyList<ActivityType> ActivityTypes { get; } = Enum.GetValues<ActivityType>();
 
