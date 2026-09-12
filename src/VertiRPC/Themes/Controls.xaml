@@ -38,14 +38,6 @@
         <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
 
-    <Style x:Key="StatusText" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource Brush.TextMuted}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="TextAlignment" Value="Center" />
-    </Style>
-
     <!-- Text input -->
 
     <Style TargetType="TextBox">

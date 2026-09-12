@@ -33,12 +33,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     private bool _customEndEnabled;
 
-    [ObservableProperty]
-    private string _statusMessage = string.Empty;
-
-    [ObservableProperty]
-    private bool _statusIsError;
-
     public MainViewModel(SettingsService settingsService, PresenceService presence, StartupService startup)
     {
         _settingsService = settingsService;
@@ -197,7 +191,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
                 return;
 
             if (!_startup.SetEnabled(value))
-                ShowStatus("Could not change the Windows startup entry.", isError: true);
+                Dialogs.Warning("Startup Settings Error", "Could not change the Windows startup entry.");
 
             Save();
         }
@@ -277,7 +271,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Save()
     {
         if (!_settingsService.Save(_settings))
-            ShowStatus("Settings could not be saved.", isError: true);
+            Dialogs.Warning("Settings Not Saved", "Your settings could not be written to disk.");
     }
 
     private void StartWatching()
@@ -303,9 +297,10 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
                     await PushAsync(announce: false);
                     break;
 
+                // Silently: Discord going away is not something the user did,
+                // and the presence returns on its own when it reopens.
                 case WatchdogAction.Drop:
                     _presence.Disconnect();
-                    ShowStatus("Discord closed. The presence will return when it reopens.");
                     break;
             }
         }
@@ -322,36 +317,44 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             await PushAsync(announce: false);
     }
 
+    /// <param name="announce">
+    /// Whether the user asked for this push, and so is owed a dialog. The
+    /// watchdog's own attempts pass false: it runs every few seconds, and a
+    /// message box each time would make the app unusable.
+    /// </param>
     private async Task PushAsync(bool announce)
     {
         var status = await _presence.PushAsync(_settings);
 
         if (status is PresenceStatus.Updated)
-        {
             ScheduleMidnightRefresh();
-            if (announce)
-                ShowStatus("Rich Presence updated.");
-            else
-                ShowStatus("Connected to Discord.");
+
+        if (!announce)
             return;
+
+        switch (status)
+        {
+            case PresenceStatus.Updated:
+                Dialogs.Information("Success", "Discord Rich Presence updated successfully!");
+                break;
+
+            case PresenceStatus.MissingClientId:
+                Dialogs.Warning("Missing Client ID", "Please enter a valid Discord Application Client ID.");
+                break;
+
+            case PresenceStatus.InvalidClientId:
+                Dialogs.Warning("Invalid Client ID", "That Client ID is not a Discord application ID (17-20 digits).");
+                break;
+
+            case PresenceStatus.DiscordUnavailable:
+                Dialogs.Warning("Connection Error", "Could not reach Discord. Is the desktop app running?");
+                break;
+
+            case PresenceStatus.SendFailed:
+                Dialogs.Error("Update Failed", "Discord rejected the presence. Check the Client ID, image keys and button URLs.");
+                break;
         }
-
-        // A silent auto-connect attempt should not nag: Discord simply is not
-        // ready yet, and the watchdog will try again.
-        if (!announce && status is PresenceStatus.DiscordUnavailable)
-            return;
-
-        ShowStatus(Describe(status), isError: true);
     }
-
-    private static string Describe(PresenceStatus status) => status switch
-    {
-        PresenceStatus.MissingClientId => "Enter your Discord application's Client ID first.",
-        PresenceStatus.InvalidClientId => "That Client ID is not a Discord application ID (17-20 digits).",
-        PresenceStatus.DiscordUnavailable => "Could not reach Discord. Is the desktop app running?",
-        PresenceStatus.SendFailed => "Discord rejected the presence. Check the Client ID, image keys and button URLs.",
-        _ => string.Empty,
-    };
 
     /// <summary>
     /// In local-time mode the elapsed time is meant to read as a clock, so the
@@ -366,11 +369,5 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         var now = DateTime.Now;
         _midnightTimer.Interval = now.Date.AddDays(1) - now + TimeSpan.FromSeconds(1);
         _midnightTimer.Start();
-    }
-
-    private void ShowStatus(string message, bool isError = false)
-    {
-        StatusMessage = message;
-        StatusIsError = isError;
     }
 }

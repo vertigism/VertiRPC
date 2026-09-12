@@ -237,31 +237,15 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Pinned below the scroll area, so the action and its result stay put
-             however far down the form the user is. -->
+        <!-- Pinned below the scroll area, so the action stays put however far
+             down the form the user is. Outcomes are reported in a message box,
+             as the Qt build did. -->
         <Border Grid.Row="1"
                 Background="{DynamicResource Brush.Background}"
                 BorderBrush="{DynamicResource Brush.Border}"
                 BorderThickness="0,1,0,0"
                 Padding="10">
-            <StackPanel>
-                <TextBlock Text="{Binding StatusMessage}" Margin="0,0,0,10">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock" BasedOn="{StaticResource StatusText}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding StatusIsError}" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Weekend}" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding StatusMessage}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-                <Button Content="Update Presence" Command="{Binding UpdatePresenceCommand}" />
-            </StackPanel>
+            <Button Content="Update Presence" Command="{Binding UpdatePresenceCommand}" />
         </Border>
     </Grid>
 </Window>
