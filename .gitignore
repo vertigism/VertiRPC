@@ -3,13 +3,15 @@ obj/
 publish/
 installer/Output/
 
+# WPF writes a temporary project beside the real one for the markup pass and
+# deletes it afterwards; an interrupted build leaves one behind.
+*_wpftmp.csproj
+
 *.user
 *.suo
 
 .vs/
 .vscode/
 
-# Legacy PyQt build artifacts
-__pycache__/
-VertiRPC.old/build/
-VertiRPC.old/dist/
+# The PyQt build that 2.0.0 replaced, kept on disk for reference only.
+VertiRPC.old/

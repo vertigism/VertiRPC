@@ -1,0 +1,7 @@
+# Store text with LF and check it out with the platform's own endings, so the
+# history stays consistent whatever core.autocrlf a given clone is set to.
+* text=auto
+
+# Assets Git must not rewrite.
+*.ico binary
+*.png binary
