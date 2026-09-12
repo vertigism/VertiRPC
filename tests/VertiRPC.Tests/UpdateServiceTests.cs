@@ -15,12 +15,20 @@ public class UpdateServiceTests
     }
 
     [Theory]
-    [InlineData("v2.1.0", 2, 1, 0)]
-    [InlineData("V2.1.0", 2, 1, 0)]
     [InlineData("2.1.0", 2, 1, 0)]
-    public void ParseTag_ReadsTheUsualShapes(string tag, int major, int minor, int build)
+    [InlineData("2.0.0", 2, 0, 0)]
+    [InlineData("10.2.30", 10, 2, 30)]
+    public void ParseTag_ReadsAPlainVersionTag(string tag, int major, int minor, int build)
     {
         Assert.Equal(new Version(major, minor, build), UpdateService.ParseTag(tag));
+    }
+
+    [Theory]
+    [InlineData("v2.1.0")]
+    [InlineData("V2.1.0")]
+    public void ParseTag_StillReadsATagPushedWithTheOtherConvention(string tag)
+    {
+        Assert.Equal(new Version(2, 1, 0), UpdateService.ParseTag(tag));
     }
 
     [Theory]
@@ -41,9 +49,9 @@ public class UpdateServiceTests
     }
 
     [Theory]
-    [InlineData("v2.1.0")]
-    [InlineData("v2.0.1")]
-    [InlineData("v3.0.0")]
+    [InlineData("2.1.0")]
+    [InlineData("2.0.1")]
+    [InlineData("3.0.0")]
     public void ReadRelease_OffersANewerRelease(string tag)
     {
         var update = UpdateService.ReadRelease(Release(tag, "VertiRPC-9.9.9-Setup.exe"), Running);
@@ -55,8 +63,8 @@ public class UpdateServiceTests
     }
 
     [Theory]
-    [InlineData("v2.0.0")]
-    [InlineData("v1.9.9")]
+    [InlineData("2.0.0")]
+    [InlineData("1.9.9")]
     public void ReadRelease_IgnoresWhatIsNotNewer(string tag)
     {
         Assert.Null(UpdateService.ReadRelease(Release(tag, "VertiRPC-1.0.0-Setup.exe"), Running));
@@ -65,7 +73,7 @@ public class UpdateServiceTests
     [Fact]
     public void ReadRelease_PicksTheInstallerOutOfTheAssets()
     {
-        var json = Release("v2.1.0", "VertiRPC.pdb", "source.zip", "VertiRPC-2.1.0-Setup.exe");
+        var json = Release("2.1.0", "VertiRPC.pdb", "source.zip", "VertiRPC-2.1.0-Setup.exe");
 
         Assert.Equal("VertiRPC-2.1.0-Setup.exe", UpdateService.ReadRelease(json, Running)?.FileName);
     }
@@ -73,7 +81,7 @@ public class UpdateServiceTests
     [Fact]
     public void ReadRelease_IgnoresAReleaseWithNoInstaller()
     {
-        Assert.Null(UpdateService.ReadRelease(Release("v2.1.0", "source.zip"), Running));
+        Assert.Null(UpdateService.ReadRelease(Release("2.1.0", "source.zip"), Running));
     }
 
     [Theory]
@@ -82,7 +90,7 @@ public class UpdateServiceTests
     public void ReadRelease_IgnoresDraftsAndPreReleases(string flag)
     {
         var json = $$"""
-            {"tag_name":"v2.1.0","{{flag}}":true,
+            {"tag_name":"2.1.0","{{flag}}":true,
              "assets":[{"name":"VertiRPC-2.1.0-Setup.exe","browser_download_url":"https://example.test/s.exe"}]}
             """;
 
@@ -93,7 +101,7 @@ public class UpdateServiceTests
     [InlineData("")]
     [InlineData("not json")]
     [InlineData("{}")]
-    [InlineData("""{"tag_name":"v2.1.0"}""")]
+    [InlineData("""{"tag_name":"2.1.0"}""")]
     public void ReadRelease_SurvivesWhatItCannotRead(string json)
     {
         Assert.Null(UpdateService.ReadRelease(json, Running));

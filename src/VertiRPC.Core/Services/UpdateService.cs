@@ -107,7 +107,11 @@ public sealed class UpdateService : IDisposable
         return null;
     }
 
-    /// <summary>Release tags are "v2.1.0"; anything else is not one we can read.</summary>
+    /// <summary>
+    /// Release tags are the bare version, "2.1.0". A leading v is stripped rather
+    /// than rejected, so a tag pushed by hand in the other convention still reads;
+    /// anything else is not a release this can compare against.
+    /// </summary>
     public static Version? ParseTag(string? tag) =>
         Version.TryParse(tag?.TrimStart('v', 'V'), out var version) ? version : null;
 

@@ -2,12 +2,17 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    # Plain version tags, no leading letter: 2.0.0, not v2.0.0.
+    tags: ["[0-9]+.[0-9]+.[0-9]+"]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
+
+    # Creating a release is a write, and the default token is read-only.
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -16,9 +21,33 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      # The tag names the release, while the csproj names the installer and the
+      # version the app reports. If they drift, the update check offers users a
+      # release that installs what they already have and then offers it again on
+      # the next check, so a mismatch fails here instead of shipping.
+      - name: Check the tag matches the version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content src/VertiRPC/VertiRPC.csproj
+          $version = $csproj.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ($version -ne "${{ github.ref_name }}") {
+            throw "Tag ${{ github.ref_name }} does not match <Version> $version in the csproj."
+          }
+
       # Inno Setup ships on the windows runners, so there is nothing to install.
       - name: Build installer
         run: .\build.ps1
+
+      # The installer is not signed, so its checksum is the only way anyone can
+      # tell that what they downloaded is what was built here.
+      - name: Take the installer's checksum
+        id: installer
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem installer/Output/*.exe | Select-Object -First 1
+          Add-Content $env:GITHUB_OUTPUT "name=$($exe.Name)"
+          Add-Content $env:GITHUB_OUTPUT "sha256=$((Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower())"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -26,8 +55,25 @@ jobs:
           path: installer/Output/*.exe
 
       - name: Attach to release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: installer/Output/*.exe
+          # Appended after the body below, from the commits since the last tag.
           generate_release_notes: true
+          body: |
+            A Windows tray app for setting a custom Discord Rich Presence.
+
+            **Install:** download `${{ steps.installer.outputs.name }}` below and run it.
+            It installs per user, so there is no UAC prompt.
+
+            **Requires** the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime).
+            The installer checks for it and offers to fetch it if it is missing.
+
+            **Windows will warn you.** The installer is not code-signed, so SmartScreen
+            shows "Windows protected your PC". Choose **More info -> Run anyway**.
+            Updates offered from inside the app do not show this.
+
+            ```
+            SHA256  ${{ steps.installer.outputs.sha256 }}
+            ```
