@@ -432,8 +432,8 @@
         <Setter Property="Background" Value="{DynamicResource Brush.Field}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
-        <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-        <Setter Property="MinWidth" Value="150" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="MinWidth" Value="124" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
@@ -452,8 +452,8 @@
     <Style TargetType="MenuItem">
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
-        <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="10,4" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
