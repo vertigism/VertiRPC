@@ -11,6 +11,7 @@
         MinHeight="420"
         Icon="/Assets/icon.ico"
         Background="{DynamicResource Brush.Background}"
+        FocusVisualStyle="{x:Null}"
         TextOptions.TextFormattingMode="Display">
 
     <Window.Resources>
@@ -41,10 +42,7 @@
             </tray:TaskbarIcon.ContextMenu>
         </tray:TaskbarIcon>
 
-        <!-- The right inset is smaller because the scroll bar sits outside it. -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      Padding="10,10,2,10"
-                      Background="{DynamicResource Brush.Background}">
+        <ScrollViewer Style="{StaticResource FormScrollViewer}">
             <StackPanel>
 
                 <GroupBox Header="Core Settings">

@@ -14,6 +14,30 @@
     <!-- Check and radio indicators. -->
     <sys:Double x:Key="Indicator.Size">18</sys:Double>
 
+    <!-- The form's spacing, which FormScrollViewer below reads. The inset is what
+         surrounds the form when nothing else is in the way. When the scroll bar
+         is showing it takes the right edge, so the content stops a gap short of
+         it and the bar keeps the same gap to the frame: 4 either side, rather
+         than one number for the content and a different one for the bar. -->
+    <Thickness x:Key="Form.Inset">10</Thickness>
+    <Thickness x:Key="Form.InsetBesideScrollBar">10,10,4,10</Thickness>
+    <Thickness x:Key="Form.ScrollBarGap">0,0,4,0</Thickness>
+
+    <!-- The system focus rectangle: a black dotted line that alt-tabbing back in
+         paints around whatever holds focus, because holding Alt turns on the
+         keyboard cues. Removed rather than restyled: the templates below mark
+         keyboard focus themselves where it matters, and Tab is swallowed anyway,
+         so there is no traversal for the rectangle to follow.
+
+         This key alone is not enough. A control keeps its theme style underneath
+         the style set here, and that theme style resolved this key when the theme
+         dictionary loaded, so it still points at the system rectangle. Every
+         style below therefore nulls FocusVisualStyle outright; this entry covers
+         what has no style of its own. -->
+    <Style x:Key="{x:Static SystemParameters.FocusVisualStyleKey}">
+        <Setter Property="Control.Template" Value="{x:Null}" />
+    </Style>
+
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
@@ -41,6 +65,7 @@
     <!-- Text input -->
 
     <Style TargetType="TextBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{DynamicResource Brush.Field}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
         <Setter Property="CaretBrush" Value="{DynamicResource Brush.TextStrong}" />
@@ -89,6 +114,7 @@
     <!-- Buttons -->
 
     <Style TargetType="Button">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{DynamicResource Brush.Accent}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextOnAccent}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
@@ -128,6 +154,7 @@
          matching the Qt build. -->
 
     <Style TargetType="CheckBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
@@ -167,6 +194,7 @@
     </Style>
 
     <Style TargetType="RadioButton">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
@@ -248,6 +276,7 @@
     <!-- Combo box -->
 
     <Style TargetType="ComboBoxItem">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
@@ -278,6 +307,7 @@
     </Style>
 
     <Style TargetType="ComboBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
@@ -332,7 +362,10 @@
                                     Margin="0,2,0,0"
                                     MinWidth="{TemplateBinding ActualWidth}"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                <ScrollViewer>
+                                <!-- Auto, not the ScrollViewer default: vertical
+                                     defaults to Visible, which left a bar beside
+                                     four items that fit without one. -->
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <ItemsPresenter />
                                 </ScrollViewer>
                             </Border>
@@ -348,10 +381,14 @@
     <!-- The Qt build's metrics: a 14 wide track with a 10 wide handle (its 2
          margin either side) and a 5 radius, which is half the handle, so the
          ends are semicircles. The thickness is set outright rather than left
-         to a margin, so the radius and the width cannot disagree. One style
-         per orientation, since the thickness is a width in one and a height
-         in the other. -->
-    <Style x:Key="ScrollThumbVertical" TargetType="Thumb">
+         to a margin, so the radius and the width cannot disagree.
+
+         Vertical only. Nothing here can produce a horizontal bar: the form's
+         scroll viewer has no horizontal part in its template, the text boxes
+         hide theirs, and a ScrollViewer that says nothing leaves horizontal
+         scrolling disabled. An orientation that cannot arise is not worth a
+         second template to style it with. -->
+    <Style x:Key="ScrollThumb" TargetType="Thumb">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
@@ -359,19 +396,6 @@
                             Width="10"
                             CornerRadius="5"
                             HorizontalAlignment="Center" />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="ScrollThumbHorizontal" TargetType="Thumb">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Thumb">
-                    <Border Background="{DynamicResource Brush.ScrollHandle}"
-                            Height="10"
-                            CornerRadius="5"
-                            VerticalAlignment="Center" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -386,37 +410,69 @@
                     <Grid Background="{TemplateBinding Background}">
                         <Track x:Name="PART_Track" IsDirectionReversed="True">
                             <Track.Thumb>
-                                <Thumb Style="{StaticResource ScrollThumbVertical}" MinHeight="30" />
+                                <Thumb Style="{StaticResource ScrollThumb}" MinHeight="30" />
                             </Track.Thumb>
                         </Track>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-            <Trigger Property="Orientation" Value="Horizontal">
-                <Setter Property="Width" Value="Auto" />
-                <Setter Property="Height" Value="14" />
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ScrollBar">
-                            <Grid Background="{TemplateBinding Background}">
-                                <Track x:Name="PART_Track">
-                                    <Track.Thumb>
-                                        <Thumb Style="{StaticResource ScrollThumbHorizontal}" MinWidth="30" />
-                                    </Track.Thumb>
-                                </Track>
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
-    <!-- No implicit ScrollViewer style: it would also hit the PART_ContentHost
-         inside every TextBox and paint the field's interior. The form's scroll
-         area sets its own background instead. -->
+    <!-- Keyed, never implicit: an implicit ScrollViewer style would also hit the
+         PART_ContentHost inside every TextBox and paint the field's interior.
+
+         The stock template reserves no room for the scroll bar, so the form had
+         to carry a smaller right inset to make space by hand, which left the
+         content almost touching the frame once the window grew tall enough for
+         the bar to go away. Here the bar has a column of its own that collapses
+         with it, so the form keeps one even inset at every size, and the gap
+         either side of the bar matches when it is there. -->
+    <Style x:Key="FormScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="Background" Value="{DynamicResource Brush.Background}" />
+        <Setter Property="Padding" Value="{StaticResource Form.Inset}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollViewer">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <!-- Auto, so a collapsed bar takes no width at all. -->
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"
+                                                Margin="{TemplateBinding Padding}"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                CanContentScroll="{TemplateBinding CanContentScroll}" />
+
+                        <ScrollBar x:Name="PART_VerticalScrollBar"
+                                   Grid.Column="1"
+                                   Margin="{StaticResource Form.ScrollBarGap}"
+                                   Orientation="Vertical"
+                                   Minimum="0"
+                                   Value="{TemplateBinding VerticalOffset}"
+                                   Maximum="{TemplateBinding ScrollableHeight}"
+                                   ViewportSize="{TemplateBinding ViewportHeight}"
+                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!-- With the bar showing, the content stops a gap short of
+                             it instead of a full inset, so the space to its left
+                             and the space to its right come out the same. -->
+                        <Trigger Property="ComputedVerticalScrollBarVisibility" Value="Visible">
+                            <Setter TargetName="PART_ScrollContentPresenter"
+                                    Property="Margin"
+                                    Value="{StaticResource Form.InsetBesideScrollBar}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <!-- The tray menu, which would otherwise be the bright system default. -->
 
@@ -442,6 +498,7 @@
     </Style>
 
     <Style TargetType="MenuItem">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="12" />
@@ -472,18 +529,10 @@
     </Style>
 
     <!-- Menus look their separator up by this key, not by type, which is why a
-         plain Separator style left the bright default line in place. -->
+         plain Separator style left the bright default line in place. The tray
+         menu holds the only separator in the app, so this key is the only one
+         needed; a separator added outside a menu would want a style of its own. -->
     <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Separator">
-                    <Border Height="1" Margin="4,3" Background="{DynamicResource Brush.Border}" />
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="Separator">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Separator">
