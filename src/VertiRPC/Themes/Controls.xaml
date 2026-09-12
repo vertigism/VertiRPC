@@ -8,6 +8,12 @@
     <sys:Double x:Key="Font.Size">13</sys:Double>
     <FontFamily x:Key="Font.Family">Segoe UI</FontFamily>
 
+    <!-- One height for every input, so the combo box and the text boxes line up. -->
+    <sys:Double x:Key="Field.Height">32</sys:Double>
+
+    <!-- Check and radio indicators. -->
+    <sys:Double x:Key="Indicator.Size">18</sys:Double>
+
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
@@ -52,6 +58,7 @@
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
         <Setter Property="Padding" Value="6,5" />
+        <Setter Property="MinHeight" Value="{DynamicResource Field.Height}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -134,7 +141,8 @@
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
                         <Border x:Name="Box"
-                                Width="16" Height="16"
+                                Width="{DynamicResource Indicator.Size}"
+                                Height="{DynamicResource Indicator.Size}"
                                 CornerRadius="3"
                                 Background="{DynamicResource Brush.Field}"
                                 BorderBrush="{DynamicResource Brush.Border}"
@@ -175,7 +183,8 @@
                         <!-- Square, like the Qt build: the stylesheet gave radio
                              and check indicators the same 3px radius. -->
                         <Border x:Name="Box"
-                                Width="16" Height="16"
+                                Width="{DynamicResource Indicator.Size}"
+                                Height="{DynamicResource Indicator.Size}"
                                 CornerRadius="3"
                                 Background="{DynamicResource Brush.Field}"
                                 BorderBrush="{DynamicResource Brush.Border}"
@@ -275,6 +284,7 @@
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="MinHeight" Value="{DynamicResource Field.Height}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
@@ -386,10 +396,9 @@
         </Style.Triggers>
     </Style>
 
-    <Style TargetType="ScrollViewer">
-        <Setter Property="Background" Value="{DynamicResource Brush.Background}" />
-        <Setter Property="BorderThickness" Value="0" />
-    </Style>
+    <!-- No implicit ScrollViewer style: it would also hit the PART_ContentHost
+         inside every TextBox and paint the field's interior. The form's scroll
+         area sets its own background instead. -->
 
     <!-- The tray menu, which would otherwise be the bright system default. -->
 

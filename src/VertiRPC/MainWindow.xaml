@@ -41,7 +41,9 @@
             </tray:TaskbarIcon.ContextMenu>
         </tray:TaskbarIcon>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="14,14,10,14">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      Padding="14,14,10,14"
+                      Background="{DynamicResource Brush.Background}">
             <StackPanel>
 
                 <GroupBox Header="Core Settings">

@@ -55,7 +55,8 @@
             Background="{DynamicResource Brush.Field}"
             BorderBrush="{DynamicResource Brush.Field}"
             BorderThickness="1"
-            CornerRadius="4">
+            CornerRadius="4"
+            MinHeight="{DynamicResource Field.Height}">
         <Border.Style>
             <Style TargetType="Border">
                 <Style.Triggers>
