@@ -353,17 +353,19 @@
 
     <!-- Scroll bars: thin, no arrows, rounded handle. -->
 
-    <!-- The handle's thickness is set outright rather than left to a margin,
-         so the corner radius can be exactly half of it and the ends come out
-         as semicircles. One style per orientation, since the thickness is a
-         width in one and a height in the other. -->
+    <!-- The Qt build's metrics: a 14 wide track with a 10 wide handle (its 2
+         margin either side) and a 5 radius, which is half the handle, so the
+         ends are semicircles. The thickness is set outright rather than left
+         to a margin, so the radius and the width cannot disagree. One style
+         per orientation, since the thickness is a width in one and a height
+         in the other. -->
     <Style x:Key="ScrollThumbVertical" TargetType="Thumb">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
                     <Border Background="{DynamicResource Brush.ScrollHandle}"
-                            Width="6"
-                            CornerRadius="3"
+                            Width="10"
+                            CornerRadius="5"
                             HorizontalAlignment="Center" />
                 </ControlTemplate>
             </Setter.Value>
@@ -375,8 +377,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
                     <Border Background="{DynamicResource Brush.ScrollHandle}"
-                            Height="6"
-                            CornerRadius="3"
+                            Height="10"
+                            CornerRadius="5"
                             VerticalAlignment="Center" />
                 </ControlTemplate>
             </Setter.Value>
@@ -385,7 +387,7 @@
 
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="{DynamicResource Brush.Background}" />
-        <Setter Property="Width" Value="8" />
+        <Setter Property="Width" Value="14" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
@@ -402,7 +404,7 @@
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
                 <Setter Property="Width" Value="Auto" />
-                <Setter Property="Height" Value="8" />
+                <Setter Property="Height" Value="14" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ScrollBar">
@@ -431,14 +433,15 @@
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
+        <Setter Property="MinWidth" Value="150" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{DynamicResource Brush.Border}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="4">
+                            CornerRadius="4"
+                            Padding="2">
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                     </Border>
                 </ControlTemplate>
@@ -450,14 +453,14 @@
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="Padding" Value="12,6" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
                     <Border x:Name="Bd"
                             Background="Transparent"
-                            CornerRadius="4"
+                            CornerRadius="3"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter ContentSource="Header"
                                           VerticalAlignment="Center"
@@ -476,11 +479,23 @@
         </Setter>
     </Style>
 
+    <!-- Menus look their separator up by this key, not by type, which is why a
+         plain Separator style left the bright default line in place. -->
+    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border Height="1" Margin="4,3" Background="{DynamicResource Brush.Border}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="Separator">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Separator">
-                    <Border Height="1" Margin="6,4" Background="{DynamicResource Brush.Border}" />
+                    <Border Height="1" Margin="4,3" Background="{DynamicResource Brush.Border}" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
