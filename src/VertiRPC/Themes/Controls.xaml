@@ -224,7 +224,9 @@
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
         <Setter Property="FontFamily" Value="{DynamicResource Font.Family}" />
         <Setter Property="FontSize" Value="{DynamicResource Font.Size}" />
-        <Setter Property="Margin" Value="0,0,0,12" />
+        <!-- The template adds 8 above each group for the header to sit on the
+             border, so this bottom margin is the rest of the gap between them. -->
+        <Setter Property="Margin" Value="0,0,0,6" />
         <Setter Property="Padding" Value="12" />
         <Setter Property="Template">
             <Setter.Value>
@@ -355,8 +357,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
+                    <!-- 4px wide inside an 8px track, with the radius at half
+                         the width so the ends are fully round. -->
                     <Border Background="{DynamicResource Brush.ScrollHandle}"
-                            CornerRadius="3"
+                            CornerRadius="2"
                             Margin="2" />
                 </ControlTemplate>
             </Setter.Value>
@@ -365,7 +369,7 @@
 
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="{DynamicResource Brush.Background}" />
-        <Setter Property="Width" Value="9" />
+        <Setter Property="Width" Value="8" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
@@ -382,7 +386,7 @@
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
                 <Setter Property="Width" Value="Auto" />
-                <Setter Property="Height" Value="9" />
+                <Setter Property="Height" Value="8" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ScrollBar">

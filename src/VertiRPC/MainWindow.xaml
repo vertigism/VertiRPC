@@ -41,8 +41,9 @@
             </tray:TaskbarIcon.ContextMenu>
         </tray:TaskbarIcon>
 
+        <!-- The right inset is smaller because the scroll bar sits outside it. -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      Padding="14,14,10,14"
+                      Padding="10,10,4,10"
                       Background="{DynamicResource Brush.Background}">
             <StackPanel>
 
@@ -242,7 +243,7 @@
                 Background="{DynamicResource Brush.Background}"
                 BorderBrush="{DynamicResource Brush.Border}"
                 BorderThickness="0,1,0,0"
-                Padding="14,12">
+                Padding="10">
             <StackPanel>
                 <TextBlock Text="{Binding StatusMessage}" Margin="0,0,0,10">
                     <TextBlock.Style>
